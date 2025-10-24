@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Runner</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, sans-serif; margin:0; padding:12px; }
+      #log { white-space: pre-wrap; background: rgba(0,0,0,.06); padding:8px; border-radius:8px; }
+    </style>
+  </head>
+  <body>
+    <div id="log"></div>
+    <script>
+      const logEl = document.getElementById('log');
+      const fmt = (v)=> v instanceof Error ? `${v.name}: ${v.message}\n${v.stack||''}` :
+                       (typeof v==='object' ? (()=>{try{return JSON.stringify(v,null,2)}catch{return String(v)}})() : String(v));
+      const append = (k,...a)=>{ logEl.textContent += `[${k}] ${a.map(fmt).join(' ')}\n`; };
+      ["log","info","warn","error"].forEach(k=>{ const o=console[k].bind(console); console[k]=(...a)=>{o(...a);append(k,...a)};});
+      addEventListener('error', e=>append('error','Error event:',e.message,e.error||''));
+      addEventListener('unhandledrejection', e=>append('error','Unhandled:', e.reason||''));
+    </script>
+    <script type="module">
+      const entry = new URLSearchParams(location.search).get('entry');
+      if (!entry) {
+        console.error('No entry provided');
+      } else {
+        // ждём, пока /virtual/... начнёт отдавать 200
+        const waitOk = async (url, tries=30) => {
+          for (let i=0;i<tries;i++){
+            try {
+              const r = await fetch(url, { cache: 'no-store' });
+              if (r.ok && (r.headers.get('content-type')||'').includes('javascript')) return true;
+            } catch {}
+            await new Promise(r=>setTimeout(r, 150));
+          }
+          return false;
+        };
+        console.log('entry:', entry);
+        const ok = await waitOk(entry);
+        if (!ok) {
+          console.error('Entry not ready (no 200 JS). Check SW mounting and paths.');
+        } else {
+          import(entry).catch(err => console.error('Import failed:', err));
+        }
+      }
+    </script>
+  </body>
+</html>
