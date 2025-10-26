@@ -16,13 +16,16 @@ import {
     type DirectoryInputElement,
 } from './app-utils';
 
-export default function App() {
+export const App = () => {
     const [virtualFileSession, setVirtualFileSession] =
         useState<VirtualFileSession | null>(null);
+
     const [javaScriptFilePaths, setJavaScriptFilePaths] = useState<string[]>(
         []
     );
+
     const [entryFilePath, setEntryFilePath] = useState<string>('');
+
     const [statusMessage, setStatusMessage] = useState<string>(
         APPLICATION_STATUS_MESSAGES.idle
     );
@@ -124,7 +127,6 @@ export default function App() {
         )
             .then((listingResponse) => listingResponse.json())
             .catch(() => null);
-
         console.log(
             APPLICATION_LOG_MESSAGES.virtualFileListPrefix,
             virtualFileListing
@@ -218,4 +220,4 @@ export default function App() {
             />
         </div>
     );
-}
+};

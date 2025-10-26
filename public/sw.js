@@ -73,12 +73,12 @@ const createListResponse = (virtualFileSessionIdentifier, virtualFileStore) => {
         keys: availableFilePaths,
     };
 
-    return new Response(JSON.stringify(responsePayload), {
-        status: 200,
-        headers: {
-            'Content-Type': SERVICE_WORKER_CONSTANTS.listResponseContentType,
-        },
-    });
+  return new Response(JSON.stringify(responsePayload), {
+    status: 200,
+    headers: {
+      "Content-Type": SERVICE_WORKER_CONSTANTS.listResponseContentType,
+    },
+  });
 }
 
 const createSessionNotFoundResponse = () => {

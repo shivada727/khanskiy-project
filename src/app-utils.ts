@@ -49,7 +49,7 @@ const MIME_TYPE_BY_EXTENSION = {
     '.html': 'text/html',
 };
 
-export async function ensureServiceWorkerReady() {
+export const ensureServiceWorkerReady = async () => {
     if (!('serviceWorker' in navigator)) {
         throw new Error(APPLICATION_ERROR_MESSAGES.serviceWorkerUnsupported);
     }
@@ -62,17 +62,17 @@ export async function ensureServiceWorkerReady() {
     );
 
     await navigator.serviceWorker.ready;
-}
+};
 
-export function normalizeVirtualFilePath(rawVirtualFilePath: string) {
+export const normalizeVirtualFilePath = (rawVirtualFilePath: string) => {
     const safePathValue = rawVirtualFilePath || '';
 
     const trimmedLeadingSlashes = safePathValue.replace(/^\/+/, '');
 
     return `/${trimmedLeadingSlashes}`;
-}
+};
 
-export function determineMimeTypeForPath(virtualFilePath: string) {
+export const determineMimeTypeForPath = (virtualFilePath: string) => {
     const filePath = virtualFilePath.toLowerCase();
 
     const extensionEntries = Object.entries(MIME_TYPE_BY_EXTENSION);
@@ -84,9 +84,9 @@ export function determineMimeTypeForPath(virtualFilePath: string) {
     }
 
     return '';
-}
+};
 
-export async function createVirtualFileDescriptors(selectedFiles: File[]) {
+export const createVirtualFileDescriptors = async (selectedFiles: File[]) => {
     const virtualFileDescriptorPromises = selectedFiles.map(
         async (selectedFile) => {
             const relativePath =
@@ -106,11 +106,11 @@ export async function createVirtualFileDescriptors(selectedFiles: File[]) {
     );
 
     return Promise.all(virtualFileDescriptorPromises);
-}
+};
 
-export function deriveJavaScriptFilePaths(
+export const deriveJavaScriptFilePaths = (
     virtualFileDescriptors: VirtualFileDescriptor[]
-) {
+) => {
     const normalizedVirtualFilePaths = virtualFileDescriptors.map(
         (virtualFileDescriptor) =>
             normalizeVirtualFilePath(virtualFileDescriptor.path)
@@ -125,9 +125,9 @@ export function deriveJavaScriptFilePaths(
             return virtualFilePath.endsWith('.mjs');
         })
         .sort((leftPath, rightPath) => leftPath.localeCompare(rightPath));
-}
+};
 
-export function selectPreferredEntryFilePath(javaScriptFilePaths: string[]) {
+export const selectPreferredEntryFilePath = (javaScriptFilePaths: string[]) => {
     if (javaScriptFilePaths.length === 0) {
         return '';
     }
@@ -149,23 +149,23 @@ export function selectPreferredEntryFilePath(javaScriptFilePaths: string[]) {
     }
 
     return javaScriptFilePaths[0];
-}
+};
 
-export function buildRunnerPageUrl(entryModuleUrl: string) {
+export const buildRunnerPageUrl = (entryModuleUrl: string) => {
     const encodedEntryUrl = encodeURIComponent(entryModuleUrl);
 
     return `${APPLICATION_CONSTANTS.runnerPagePath}?${APPLICATION_CONSTANTS.runnerEntryQueryParameter}=${encodedEntryUrl}`;
-}
+};
 
-export function buildLoadedFilesStatusMessage(fileCount: number) {
+export const buildLoadedFilesStatusMessage = (fileCount: number) => {
     return `loaded ${fileCount} files`;
-}
+};
 
-export function buildEntryNotReachableMessage(entryModuleUrl: string) {
+export const buildEntryNotReachableMessage = (entryModuleUrl: string) => {
     return `${APPLICATION_ERROR_MESSAGES.entryNotReachablePrefix}${entryModuleUrl}`;
-}
+};
 
-export function buildServiceWorkerErrorMessage(error: unknown) {
+export const buildServiceWorkerErrorMessage = (error: unknown) => {
     if (error instanceof Error) {
         return `${APPLICATION_ERROR_MESSAGES.serviceWorkerErrorPrefix}${error.message}`;
     }
@@ -177,7 +177,7 @@ export function buildServiceWorkerErrorMessage(error: unknown) {
     return `${APPLICATION_ERROR_MESSAGES.serviceWorkerErrorPrefix}${String(
         error
     )}`;
-}
+};
 
 export class VirtualFileSession {
     public readonly sessionIdentifier = Math.random().toString(36).slice(2);
@@ -193,10 +193,12 @@ export class VirtualFileSession {
             const normalizedVirtualFilePath = normalizeVirtualFilePath(
                 virtualFileDescriptor.path
             );
+
             const normalizedVirtualFileDescriptor = {
                 ...virtualFileDescriptor,
                 path: normalizedVirtualFilePath,
             };
+
             this.virtualFileStore.set(
                 normalizedVirtualFilePath,
                 normalizedVirtualFileDescriptor
@@ -215,11 +217,11 @@ export class VirtualFileSession {
         virtualFileBroadcastChannel.close();
     }
 
-    getBasePath() {
+    public getBasePath() {
         return `${APPLICATION_CONSTANTS.virtualNamespacePrefix}${this.sessionIdentifier}`;
     }
 
-    buildFileUrl(relativeFilePath: string) {
+    public buildFileUrl(relativeFilePath: string) {
         const sanitizedRelativeFilePath = relativeFilePath.replace(/^\/+/, '');
         return `${this.getBasePath()}/${sanitizedRelativeFilePath}`;
     }
