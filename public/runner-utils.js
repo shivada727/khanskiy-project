@@ -1,6 +1,6 @@
-const RUNNER_CONSTANTS = Object.freeze({
+const RUNNER_CONSTANTS = {
     logContainerElementIdentifier: "log",
-    consoleMethodNames: Object.freeze(["log", "info", "warn", "error"]),
+    consoleMethodNames: ["log", "info", "warn", "error"],
     entryQueryParameterKey: "entry",
     missingEntryMessage: "No entry provided",
     entryLogPrefix: "entry:",
@@ -13,7 +13,7 @@ const RUNNER_CONSTANTS = Object.freeze({
     waitAttemptCount: 30,
     waitDelayMilliseconds: 150,
     fetchOptions: Object.freeze({ cache: "no-store" }),
-});
+};
 
 const findLogContainerElement = (documentReference) => {
     return documentReference.getElementById(
