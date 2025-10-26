@@ -76,7 +76,7 @@ function createListResponse(virtualFileSessionIdentifier, virtualFileStore) {
   return new Response(JSON.stringify(responsePayload), {
     status: 200,
     headers: {
-      HEADERS: SERVICE_WORKER_CONSTANTS.listResponseContentType,
+      "Content-Type": SERVICE_WORKER_CONSTANTS.listResponseContentType,
     },
   });
 }
