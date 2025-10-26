@@ -12,14 +12,14 @@
         body {
             font-family: system-ui, sans-serif;
             margin: 0;
-            padding: 12px;
+            padding: 0.75rem;
         }
 
         #log {
             white-space: pre-wrap;
-            background: rgba(0, 0, 0, .06);
-            padding: 8px;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.06);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
         }
     </style>
 </head>
@@ -29,13 +29,15 @@
     <script src="./runner-utils.js"></script>
     <script>
         const logContainerElement = RunnerUtilities.findLogContainerElement(document);
+
         RunnerUtilities.overrideConsoleMethods(logContainerElement);
+
         RunnerUtilities.registerGlobalErrorListeners(logContainerElement);
     </script>
     <script type="module">
         const { RUNNER_CONSTANTS, extractEntryModuleUrl, waitForEntryModule } = RunnerUtilities;
 
-        async function initializeRunnerPage() {
+        const initializeRunnerPage = async () => {
             const entryModuleUrl = extractEntryModuleUrl(window.location.search);
 
             if (!entryModuleUrl) {
@@ -47,9 +49,10 @@
             console.log(RUNNER_CONSTANTS.entryLogPrefix, entryModuleUrl);
 
             const entryModuleReady = await waitForEntryModule(entryModuleUrl);
+
             if (!entryModuleReady) {
                 console.error(RUNNER_CONSTANTS.entryNotReadyMessage);
-                ё
+
                 return;
             }
 
