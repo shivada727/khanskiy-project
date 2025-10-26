@@ -11,7 +11,7 @@ export type DirectoryInputElement = DetailedHTMLProps<
   HTMLInputElement
 > & { webkitdirectory?: boolean | string; directory?: boolean | string };
 
-export const APPLICATION_CONSTANTS = Object.freeze({
+export const APPLICATION_CONSTANTS = {
   serviceWorkerScriptPath: "/sw.js",
   serviceWorkerScriptType: "module" as const,
   broadcastChannelName: "vfs",
@@ -21,53 +21,59 @@ export const APPLICATION_CONSTANTS = Object.freeze({
   mainEntryFilePattern: /(^|\/)main\.m?js$/i,
   indexEntryFilePattern: /(^|\/)index\.m?js$/i,
   serviceWorkerPingSuccessValue: "ok",
-});
+};
 
-export const APPLICATION_STATUS_MESSAGES = Object.freeze({
+export const APPLICATION_STATUS_MESSAGES = {
   idle: "idle",
   readingFiles: "reading files…",
   running: "running…",
-});
+};
 
-export const APPLICATION_ERROR_MESSAGES = Object.freeze({
+export const APPLICATION_ERROR_MESSAGES = {
   serviceWorkerUnsupported: "ServiceWorker unsupported",
   serviceWorkerErrorPrefix: "SW error: ",
   serviceWorkerPingFailure:
     "SW not ready (no ping). Reload page, check /sw.js scope, or hard refresh.",
   entryNotReachablePrefix: "entry not reachable: ",
-});
+};
 
-export const APPLICATION_LOG_MESSAGES = Object.freeze({
+export const APPLICATION_LOG_MESSAGES = {
   virtualFileListPrefix: "VFS list:",
-});
+};
 
-const MIME_TYPE_BY_EXTENSION = Object.freeze({
+const MIME_TYPE_BY_EXTENSION = {
   ".js": "text/javascript",
   ".mjs": "text/javascript",
   ".json": "application/json",
   ".css": "text/css",
   ".html": "text/html",
-});
+};
 
 export async function ensureServiceWorkerReady() {
   if (!("serviceWorker" in navigator)) {
     throw new Error(APPLICATION_ERROR_MESSAGES.serviceWorkerUnsupported);
   }
 
-  await navigator.serviceWorker.register(APPLICATION_CONSTANTS.serviceWorkerScriptPath, {
-    type: APPLICATION_CONSTANTS.serviceWorkerScriptType,
-  });
+  await navigator.serviceWorker.register(
+    APPLICATION_CONSTANTS.serviceWorkerScriptPath,
+    {
+      type: APPLICATION_CONSTANTS.serviceWorkerScriptType,
+    }
+  );
   await navigator.serviceWorker.ready;
 }
 
 export function normalizeVirtualFilePath(rawVirtualFilePath: string) {
   const safePathValue = rawVirtualFilePath || "";
+
   const trimmedLeadingSlashes = safePathValue.replace(/^\/+/, "");
+
   return `/${trimmedLeadingSlashes}`;
 }
 
 export function determineMimeTypeForPath(virtualFilePath: string) {
   const filePath = virtualFilePath.toLowerCase();
+
   const extensionEntries = Object.entries(MIME_TYPE_BY_EXTENSION);
 
   for (const [extension, mimeType] of extensionEntries) {
@@ -80,27 +86,33 @@ export function determineMimeTypeForPath(virtualFilePath: string) {
 }
 
 export async function createVirtualFileDescriptors(selectedFiles: File[]) {
-  const virtualFileDescriptorPromises = selectedFiles.map(async (selectedFile) => {
-    const relativePath =
-      (selectedFile as File & { webkitRelativePath?: string }).webkitRelativePath ||
-      selectedFile.name;
+  const virtualFileDescriptorPromises = selectedFiles.map(
+    async (selectedFile) => {
+      const relativePath =
+        (selectedFile as File & { webkitRelativePath?: string })
+          .webkitRelativePath || selectedFile.name;
 
-    const fileContent = await selectedFile.text();
-    const mimeType = determineMimeTypeForPath(relativePath);
+      const fileContent = await selectedFile.text();
 
-    return {
-      path: relativePath,
-      content: fileContent,
-      type: mimeType,
-    } satisfies VirtualFileDescriptor;
-  });
+      const mimeType = determineMimeTypeForPath(relativePath);
+
+      return {
+        path: relativePath,
+        content: fileContent,
+        type: mimeType,
+      } satisfies VirtualFileDescriptor;
+    }
+  );
 
   return Promise.all(virtualFileDescriptorPromises);
 }
 
-export function deriveJavaScriptFilePaths(virtualFileDescriptors: VirtualFileDescriptor[]) {
-  const normalizedVirtualFilePaths = virtualFileDescriptors.map((virtualFileDescriptor) =>
-    normalizeVirtualFilePath(virtualFileDescriptor.path),
+export function deriveJavaScriptFilePaths(
+  virtualFileDescriptors: VirtualFileDescriptor[]
+) {
+  const normalizedVirtualFilePaths = virtualFileDescriptors.map(
+    (virtualFileDescriptor) =>
+      normalizeVirtualFilePath(virtualFileDescriptor.path)
   );
 
   return normalizedVirtualFilePaths
@@ -120,15 +132,17 @@ export function selectPreferredEntryFilePath(javaScriptFilePaths: string[]) {
   }
 
   const mainEntryMatch = javaScriptFilePaths.find((filePath) =>
-    APPLICATION_CONSTANTS.mainEntryFilePattern.test(filePath),
+    APPLICATION_CONSTANTS.mainEntryFilePattern.test(filePath)
   );
+
   if (mainEntryMatch) {
     return mainEntryMatch;
   }
 
   const indexEntryMatch = javaScriptFilePaths.find((filePath) =>
-    APPLICATION_CONSTANTS.indexEntryFilePattern.test(filePath),
+    APPLICATION_CONSTANTS.indexEntryFilePattern.test(filePath)
   );
+
   if (indexEntryMatch) {
     return indexEntryMatch;
   }
@@ -138,6 +152,7 @@ export function selectPreferredEntryFilePath(javaScriptFilePaths: string[]) {
 
 export function buildRunnerPageUrl(entryModuleUrl: string) {
   const encodedEntryUrl = encodeURIComponent(entryModuleUrl);
+
   return `${APPLICATION_CONSTANTS.runnerPagePath}?${APPLICATION_CONSTANTS.runnerEntryQueryParameter}=${encodedEntryUrl}`;
 }
 
@@ -158,7 +173,9 @@ export function buildServiceWorkerErrorMessage(error: unknown) {
     return `${APPLICATION_ERROR_MESSAGES.serviceWorkerErrorPrefix}${error}`;
   }
 
-  return `${APPLICATION_ERROR_MESSAGES.serviceWorkerErrorPrefix}${String(error)}`;
+  return `${APPLICATION_ERROR_MESSAGES.serviceWorkerErrorPrefix}${String(
+    error
+  )}`;
 }
 
 export class VirtualFileSession {
@@ -169,21 +186,28 @@ export class VirtualFileSession {
     this.virtualFileStore.clear();
 
     for (const virtualFileDescriptor of virtualFileDescriptors) {
-      const normalizedVirtualFilePath = normalizeVirtualFilePath(virtualFileDescriptor.path);
+      const normalizedVirtualFilePath = normalizeVirtualFilePath(
+        virtualFileDescriptor.path
+      );
       const normalizedVirtualFileDescriptor = {
         ...virtualFileDescriptor,
         path: normalizedVirtualFilePath,
       };
-      this.virtualFileStore.set(normalizedVirtualFilePath, normalizedVirtualFileDescriptor);
+      this.virtualFileStore.set(
+        normalizedVirtualFilePath,
+        normalizedVirtualFileDescriptor
+      );
     }
 
     const virtualFileBroadcastChannel = new BroadcastChannel(
-      APPLICATION_CONSTANTS.broadcastChannelName,
+      APPLICATION_CONSTANTS.broadcastChannelName
     );
+
     virtualFileBroadcastChannel.postMessage({
       id: this.sessionIdentifier,
       files: Array.from(this.virtualFileStore.values()),
     });
+
     virtualFileBroadcastChannel.close();
   }
 

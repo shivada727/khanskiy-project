@@ -46,6 +46,7 @@ export default function App() {
     setStatusMessage(APPLICATION_STATUS_MESSAGES.readingFiles);
 
     const updatedVirtualFileSession = new VirtualFileSession();
+    
     const virtualFileDescriptors = await createVirtualFileDescriptors(
       selectedFileList
     );

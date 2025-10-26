@@ -1,6 +1,4 @@
-importScripts("./sw-utils.js");
-
-const {
+import {
   SERVICE_WORKER_CONSTANTS,
   determineMimeTypeFromPath,
   createVirtualFileStoreMap,
@@ -8,7 +6,7 @@ const {
   isPingRequest,
   isListRequest,
   buildNotFoundMessage,
-} = self.ServiceWorkerUtilities;
+} from "./sw-utils";
 
 self.addEventListener("install", (installEvent) => self.skipWaiting());
 
@@ -24,7 +22,7 @@ const virtualFileSystemBroadcastChannel = new BroadcastChannel(
 
 virtualFileSystemBroadcastChannel.onmessage = (messageEvent) => {
   const eventData = messageEvent.data || {};
-  
+
   const { id: virtualFileSessionIdentifier, files: virtualFileDescriptors } =
     eventData;
 
@@ -78,7 +76,7 @@ function createListResponse(virtualFileSessionIdentifier, virtualFileStore) {
   return new Response(JSON.stringify(responsePayload), {
     status: 200,
     headers: {
-      "Content-Type": SERVICE_WORKER_CONSTANTS.listResponseContentType,
+      HEADERS: SERVICE_WORKER_CONSTANTS.listResponseContentType,
     },
   });
 }
@@ -129,6 +127,7 @@ function handleVirtualRequest(requestUniformResourceLocator) {
   const requestedVirtualFilePath = buildRequestedVirtualFilePath(
     virtualFilePathSegments
   );
+  
   const candidateVirtualFilePaths = [
     requestedVirtualFilePath,
     `${requestedVirtualFilePath}.js`,
@@ -138,6 +137,7 @@ function handleVirtualRequest(requestUniformResourceLocator) {
     const virtualFileDescriptor = virtualFileStore.get(
       candidateVirtualFilePath
     );
+
     if (!virtualFileDescriptor) {
       continue;
     }
