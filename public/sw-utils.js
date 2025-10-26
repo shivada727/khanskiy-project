@@ -1,4 +1,4 @@
-const SERVICE_WORKER_CONSTANTS = Object.freeze({
+export const SERVICE_WORKER_CONSTANTS = {
   broadcastChannelName: "vfs",
   virtualNamespacePrefix: "/virtual/",
   pingSegment: "__ping",
@@ -10,17 +10,19 @@ const SERVICE_WORKER_CONSTANTS = Object.freeze({
   defaultMimeType: "text/plain",
   sessionNotFoundMessage: "Session not found",
   notFoundMessagePrefix: "Not found: ",
-});
+};
 
-const MIME_TYPE_BY_EXTENSION = Object.freeze({
+export const CONTENT = 'Content-Type';
+
+export const MIME_TYPE_BY_EXTENSION = {
   ".js": "text/javascript",
   ".mjs": "text/javascript",
   ".json": "application/json",
   ".css": "text/css",
   ".html": "text/html",
-});
+};
 
-function determineMimeTypeFromPath(virtualFilePath) {
+export function determineMimeTypeFromPath(virtualFilePath) {
   const extensionEntries = Object.entries(MIME_TYPE_BY_EXTENSION);
 
   for (const [extension, mimeType] of extensionEntries) {
@@ -28,10 +30,11 @@ function determineMimeTypeFromPath(virtualFilePath) {
       return mimeType;
     }
   }
+
   return SERVICE_WORKER_CONSTANTS.defaultMimeType;
 }
 
-function normalizeVirtualFilePath(rawVirtualFilePath) {
+export function normalizeVirtualFilePath(rawVirtualFilePath) {
   const safePathValue = String(rawVirtualFilePath || "");
 
   const trimmedLeadingSlashes = safePathValue.replace(/^\/+/, "");
@@ -39,7 +42,7 @@ function normalizeVirtualFilePath(rawVirtualFilePath) {
   return `/${trimmedLeadingSlashes}`;
 }
 
-function createVirtualFileStoreMap(fileDescriptors) {
+export function createVirtualFileStoreMap(fileDescriptors) {
   const virtualFileStoreMap = new Map();
 
   if (!Array.isArray(fileDescriptors)) {
@@ -50,41 +53,33 @@ function createVirtualFileStoreMap(fileDescriptors) {
     const normalizedVirtualFilePath = normalizeVirtualFilePath(
       fileDescriptor.path
     );
+
     virtualFileStoreMap.set(normalizedVirtualFilePath, fileDescriptor);
   }
 
   return virtualFileStoreMap;
 }
 
-function isVirtualNamespacePath(pathname) {
+export function isVirtualNamespacePath(pathname) {
   return pathname.startsWith(SERVICE_WORKER_CONSTANTS.virtualNamespacePrefix);
 }
 
-function isPingRequest(pathSegments) {
+export function isPingRequest(pathSegments) {
   return (
     pathSegments.length === 1 &&
     pathSegments[0] === SERVICE_WORKER_CONSTANTS.pingSegment
   );
 }
 
-function isListRequest(pathSegments) {
+export function isListRequest(pathSegments) {
   return (
     pathSegments.length === 1 &&
     pathSegments[0] === SERVICE_WORKER_CONSTANTS.listSegment
   );
 }
 
-function buildNotFoundMessage(virtualFilePath) {
+export function buildNotFoundMessage(virtualFilePath) {
   return `${SERVICE_WORKER_CONSTANTS.notFoundMessagePrefix}${virtualFilePath}`;
 }
 
-self.ServiceWorkerUtilities = Object.freeze({
-  SERVICE_WORKER_CONSTANTS,
-  determineMimeTypeFromPath,
-  normalizeVirtualFilePath,
-  createVirtualFileStoreMap,
-  isVirtualNamespacePath,
-  isPingRequest,
-  isListRequest,
-  buildNotFoundMessage,
-});
+
